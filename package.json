@@ -1,0 +1,17 @@
+{
+  "name": "@viero/common-web",
+  "version": "1.0.0",
+  "description": "Common web code used by other viero libraries.",
+  "homepage": "https://github.com/vieroinc/viero-common-web",
+  "contributors": [
+    {
+      "name": "Zoltan Gobolos",
+      "email": "zoltan.gobolos@viero.tv"
+    }
+  ],
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vieroinc/viero-common-web.git"
+  }
+}
