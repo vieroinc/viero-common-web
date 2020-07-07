@@ -1,7 +1,7 @@
 {
   "name": "@viero/common-web",
-  "version": "1.0.0",
-  "description": "Common web code used by other viero libraries.",
+  "version": "1.0.1",
+  "description": "Common web code used by other @vieroinc libraries.",
   "homepage": "https://github.com/vieroinc/viero-common-web",
   "contributors": [
     {
@@ -13,5 +13,21 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/vieroinc/viero-common-web.git"
+  },
+  "scripts": {
+    "clean": "rm -rf window",
+    "reset": "rm -rf window node_modules",
+    "babel": "babel src -d . --source-maps inline",
+    "prepublishOnly": "babel src -d . --source-maps inline"
+  },
+  "babel": {
+    "presets": [
+      "@babel/preset-env"
+    ]
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.10.4",
+    "@babel/core": "^7.10.4",
+    "@babel/preset-env": "^7.10.4"
   }
 }
