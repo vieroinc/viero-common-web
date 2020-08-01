@@ -59,6 +59,7 @@ const endCommunication = () => {
 
 class VieroHttpClient {
   static http(url, options) {
+    // eslint-disable-next-line no-param-reassign
     options = {
       cache: 'no-store',
       credentials: 'include',
@@ -70,13 +71,17 @@ class VieroHttpClient {
     if (options.body) {
       switch (options.headers['content-type']) {
         case 'application/x-www-form-urlencoded':
+          // eslint-disable-next-line no-param-reassign
           options.body = querystring.stringify(options.body);
           break;
         default:
+          // eslint-disable-next-line no-param-reassign
           options.headers['content-type'] = 'application/json';
+          // eslint-disable-next-line no-param-reassign
           options.body = JSON.stringify(options.body);
           break;
       }
+      // eslint-disable-next-line no-param-reassign
       options.headers['content-length'] = byteLengthOf(options.body);
     }
     beginCommunication();

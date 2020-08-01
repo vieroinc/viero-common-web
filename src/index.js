@@ -14,8 +14,5 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-export { VieroApp } from './app';
-export { VieroWebComponent } from './webcomponent';
 export { VieroEventCenter } from './event';
 export { VieroHttpClient } from './http';
-export { VieroWindowUtils } from './window/utils';
