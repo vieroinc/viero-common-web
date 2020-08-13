@@ -32,7 +32,7 @@ const BATCH_SIZE = 50;
 
 class VieroPlatform {
   /* --------------------------------------------------- */
-  /* -- CONFIGURATION OVERRIDE AND DEPENDANT ----------- */
+  /* -- CONFIGURATION ---------------------------------- */
   /* --------------------------------------------------- */
 
   static configure({ api, img }) {
@@ -119,7 +119,7 @@ class VieroPlatform {
     return VieroHttpClient[method](`${CONFIGURATION.URL.API}${url}`, { headers, body })
       .catch((err) => {
         throw new VieroError('VieroPlatform', 799861, {
-          [VieroPlatform.KEY.URL]: url,
+          [VieroPlatform.ERROR.KEY.URL]: url,
           [VieroError.KEY.ERROR]: err,
         });
       })
@@ -139,13 +139,13 @@ class VieroPlatform {
             // or anything else
             if (res.status >= 500) {
               throw new VieroError('VieroPlatform', 878991, {
-                [VieroPlatform.KEY.STATUS]: res.status,
-                [VieroPlatform.KEY.URL]: url,
+                [VieroPlatform.ERROR.KEY.STATUS]: res.status,
+                [VieroPlatform.ERROR.KEY.URL]: url,
               });
             }
             throw new VieroError('VieroPlatform', 367152, {
-              [VieroPlatform.KEY.STATUS]: res.status,
-              [VieroPlatform.KEY.URL]: url,
+              [VieroPlatform.ERROR.KEY.STATUS]: res.status,
+              [VieroPlatform.ERROR.KEY.URL]: url,
             });
         }
       });
@@ -217,9 +217,11 @@ class VieroPlatform {
   }
 }
 
-VieroPlatform.KEY = {
-  URL: 'VieroPlatformKeyUrl',
-  STATUS: 'VieroPlatformKeyStatus',
+VieroPlatform.ERROR = {
+  KEY: {
+    URL: 'VieroPlatformKeyUrl',
+    STATUS: 'VieroPlatformKeyStatus',
+  },
 };
 
 export { VieroPlatform };
