@@ -30,6 +30,7 @@ const getDisplayStream = (constraints) => navigator.mediaDevices.getDisplayMedia
 
 const canRequestApprovalDialog = () => canGetUserStream();
 
+// eslint-disable-next-line max-len
 const requestApprovalDialog = ({ audio, video } = { audio: true, video: true }) => getUserStream({ audio: !!audio, video: !!video })
   .then((stream) => {
     if (stream) {

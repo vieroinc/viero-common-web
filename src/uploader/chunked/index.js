@@ -105,32 +105,32 @@ class VieroChunkedUploader {
       .then(() => {
         this._checkCancelled();
         this._step = 'preparing';
-        emitEvent(VieroChunkedUploader.EVENT.DID_START_PROBE, { uploader: this });
+        emitEvent(VieroChunkedUploader.EVENT.DID_START_PROBING, { uploader: this });
       })
       .then(() => this.fingerprintFile())
       .then((hashes) => this.probeFile({ hashes, chunks: [] }))
       .then((startIndex) => {
         this._checkCancelled();
         if (startIndex > -1) {
-          emitEvent(VieroChunkedUploader.EVENT.DID_END_PROBE, { uploader: this });
+          emitEvent(VieroChunkedUploader.EVENT.DID_FINISH_PROBING, { uploader: this });
           this._statOverall.skip = startIndex * SLICE_LENGTH;
           this._index = startIndex;
           this._step = 'uploading';
-          emitEvent(VieroChunkedUploader.EVENT.DID_START_UPLOAD, { uploader: this });
+          emitEvent(VieroChunkedUploader.EVENT.DID_START_UPLOADING, { uploader: this });
           return this.upload();
         }
         return null;
       })
       .then((res) => {
-        emitEvent(VieroChunkedUploader.EVENT.DID_END_UPLOAD, { uploader: this });
+        emitEvent(VieroChunkedUploader.EVENT.DID_FINISH_UPLOADING, { uploader: this });
         return res;
       })
       .catch((err) => {
         if (err.code === 635766) {
-          emitEvent(VieroChunkedUploader.EVENT.DID_END_UPLOAD, { uploader: this });
+          emitEvent(VieroChunkedUploader.EVENT.DID_FINISH_UPLOADING, { uploader: this });
           return;
         }
-        emitEvent(VieroChunkedUploader.EVENT.DID_END_UPLOAD, { uploader: this, err });
+        emitEvent(VieroChunkedUploader.EVENT.DID_FINISH_UPLOADING, { uploader: this, err });
       });
   }
 
@@ -301,7 +301,7 @@ class VieroChunkedUploader {
     if (this._step !== 'cancelling') {
       this._step = 'uploading';
     }
-    emitEvent(VieroChunkedUploader.EVENT.DID_START_UPLOAD_CHUNK, { uploader: this });
+    emitEvent(VieroChunkedUploader.EVENT.DID_START_UPLOADING_CHUNK, { uploader: this });
     return this.uploadChunk({
       contentType: this._uploadable.mime,
       data: slice,
@@ -310,14 +310,14 @@ class VieroChunkedUploader {
       token: this._token,
     })
       .then(() => {
-        emitEvent(VieroChunkedUploader.EVENT.DID_END_UPLOAD_CHUNK, { uploader: this });
+        emitEvent(VieroChunkedUploader.EVENT.DID_FINISH_UPLOADING_CHUNK, { uploader: this });
         if (!this._isLast) {
           this._index += 1;
           this.upload();
         }
       })
       .catch((err) => {
-        emitEvent(VieroChunkedUploader.EVENT.DID_END_UPLOAD_CHUNK, { uploader: this, err });
+        emitEvent(VieroChunkedUploader.EVENT.DID_FINISH_UPLOADING_CHUNK, { uploader: this, err });
       });
   }
 
@@ -343,7 +343,7 @@ class VieroChunkedUploader {
         if (this._step !== 'cancelling') {
           this._step = 'uploading';
         }
-        emitEvent(VieroChunkedUploader.EVENT.DID_PROGRESS_UPLOAD_CHUNK, { uploader: this });
+        emitEvent(VieroChunkedUploader.EVENT.DID_PROGRESS_UPLOADING_CHUNK, { uploader: this });
       });
       xhr.addEventListener('load', () => {
         if (xhr.status !== 200) {
@@ -416,18 +416,18 @@ class VieroChunkedUploader {
 }
 
 VieroChunkedUploader.EVENT = {
-  DID_START_PROBE: 'VieroChunkedUploaderEventDidStartProbe',
-  DID_END_PROBE: 'VieroChunkedUploaderEventDidEndProbe',
+  DID_START_PROBING: 'VieroChunkedUploaderEventDidStartProbing',
+  DID_FINISH_PROBING: 'VieroChunkedUploaderEventDidFinishProbing',
 
-  DID_START_UPLOAD: 'VieroChunkedUploaderEventDidStartUpload',
+  DID_START_UPLOADING: 'VieroChunkedUploaderEventDidStartUploading',
 
-  DID_START_UPLOAD_CHUNK: 'VieroChunkedUploaderEventDidStartUploadChunk',
-  DID_PROGRESS_UPLOAD_CHUNK: 'VieroChunkedUploaderEventDidProgressUploadChunk',
-  DID_END_UPLOAD_CHUNK: 'VieroChunkedUploaderEventDidEndUploadChunk',
+  DID_START_UPLOADING_CHUNK: 'VieroChunkedUploaderEventDidStartUploadingChunk',
+  DID_PROGRESS_UPLOADING_CHUNK: 'VieroChunkedUploaderEventDidProgressUploadingChunk',
+  DID_FINISH_UPLOADING_CHUNK: 'VieroChunkedUploaderEventDidFinishUploadingChunk',
 
   RETRYING: 'VieroChunkedUploaderEventRetrying',
 
-  DID_END_UPLOAD: 'VieroChunkedUploaderEventDidEndUpload',
+  DID_FINISH_UPLOADING: 'VieroChunkedUploaderEventDidFinishUploading',
 };
 
 export { VieroChunkedUploader };

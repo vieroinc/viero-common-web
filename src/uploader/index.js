@@ -156,12 +156,12 @@ class VieroUploader {
 VieroUploader.EVENT = {
   DID_ENQUEUE: 'VieroUploaderEventDidEnqueue',
 
-  DID_START_PREPARE_FILE: 'VieroUploaderEventDidStartPrepareFile',
-  DID_END_PREPARE_FILE: 'VieroUploaderEventDidEndPrepareFile',
+  DID_START_PREPARING_FILE: 'VieroUploaderEventDidStartPreparingFile',
+  DID_FINISH_PREPARING_FILE: 'VieroUploaderEventDidFinishPreparingFile',
 
   DID_START_UPLOADING_FILE: 'VieroUploaderEventDidStartUploadingFile',
   DID_PROGRESS_UPLOADING_FILE: 'VieroUploaderEventDidProgressUploadingFile',
-  DID_END_UPLOADING_FILE: 'VieroUploaderEventDidEndUploadingFile',
+  DID_FINISH_UPLOADING_FILE: 'VieroUploaderEventDidFinishUploadingFile',
 
   RETRYING: 'VieroUploaderEventRetrying',
 
@@ -171,12 +171,13 @@ VieroUploader.EVENT = {
 const VCUE = VieroChunkedUploader.EVENT;
 const VUE = VieroUploader.EVENT;
 
-onEvent(VCUE.DID_START_PROBE, (evt) => emitEvent(VUE.DID_START_PREPARE_FILE, evt.detail));
-onEvent(VCUE.DID_END_PROBE, (evt) => emitEvent(VUE.DID_END_PREPARE_FILE, evt.detail));
-onEvent(VCUE.DID_START_UPLOAD, (evt) => emitEvent(VUE.DID_START_UPLOADING_FILE, evt.detail));
-onEvent(VCUE.DID_PROGRESS_UPLOAD_CHUNK, (evt) => emitEvent(VUE.DID_PROGRESS_UPLOADING_FILE, evt.detail));
-onEvent(VCUE.DID_END_UPLOAD_CHUNK, (evt) => emitEvent(VUE.DID_PROGRESS_UPLOADING_FILE, evt.detail));
-onEvent(VCUE.DID_END_UPLOAD, (evt) => emitEvent(VUE.DID_END_UPLOADING_FILE, evt.detail));
+onEvent(VCUE.DID_START_PROBING, (evt) => emitEvent(VUE.DID_START_PREPARING_FILE, evt.detail));
+onEvent(VCUE.DID_FINISH_PROBING, (evt) => emitEvent(VUE.DID_FINISH_PREPARING_FILE, evt.detail));
+onEvent(VCUE.DID_START_UPLOADING, (evt) => emitEvent(VUE.DID_START_UPLOADING_FILE, evt.detail));
+onEvent(VCUE.DID_START_UPLOADING_CHUNK, (evt) => emitEvent(VUE.DID_PROGRESS_UPLOADING_FILE, evt.detail));
+onEvent(VCUE.DID_PROGRESS_UPLOADING_CHUNK, (evt) => emitEvent(VUE.DID_PROGRESS_UPLOADING_FILE, evt.detail));
+onEvent(VCUE.DID_FINISH_UPLOADING_CHUNK, (evt) => emitEvent(VUE.DID_PROGRESS_UPLOADING_FILE, evt.detail));
 onEvent(VCUE.RETRYING, (evt) => emitEvent(VUE.RETRYING, evt.detail));
+onEvent(VCUE.DID_FINISH_UPLOADING, (evt) => emitEvent(VUE.DID_FINISH_UPLOADING_FILE, evt.detail));
 
 export { VieroUploader };
