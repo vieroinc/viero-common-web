@@ -20,7 +20,11 @@ import Rusha from 'rusha';
 import { VieroPlatform } from '../../platform';
 import { emitEvent } from '../../event';
 import {
-  VieroUploaderCancelled, VieroUploaderFullyUploaded, VieroUploaderConflictError, VieroUploaderTechnicalError,
+  VieroUploaderCancelled,
+  VieroUploaderConflictError,
+  VieroUploaderFullyUploaded,
+  VieroUploaderGenericError,
+  VieroUploaderNotFoundError,
 } from '../common';
 
 const SLICE_LENGTH = 52428800;
@@ -70,6 +74,10 @@ class VieroChunkedUploader {
     return progress;
   }
 
+  get item() {
+    return this._uploadable;
+  }
+
   cancel() {
     this._cancelled = true;
     if (this._retryTimeout) {
@@ -107,8 +115,8 @@ class VieroChunkedUploader {
         this._step = 'preparing';
         emitEvent(VieroChunkedUploader.EVENT.DID_START_PROBING, { uploader: this });
       })
-      .then(() => this.fingerprintFile())
-      .then((hashes) => this.probeFile({ hashes, chunks: [] }))
+      .then(() => this._fingerprintFile())
+      .then((hashes) => this._probeFile({ hashes, chunks: [] }))
       .then((startIndex) => {
         this._checkCancelled();
         if (startIndex > -1) {
@@ -117,7 +125,7 @@ class VieroChunkedUploader {
           this._index = startIndex;
           this._step = 'uploading';
           emitEvent(VieroChunkedUploader.EVENT.DID_START_UPLOADING, { uploader: this });
-          return this.upload();
+          return this._upload();
         }
         return null;
       })
@@ -134,7 +142,7 @@ class VieroChunkedUploader {
       });
   }
 
-  probeFile({ hashes, chunks, chunkPromises }) {
+  _probeFile({ hashes, chunks, chunkPromises }) {
     this._checkCancelled();
     if (!chunkPromises) {
       const proms = [];
@@ -145,19 +153,19 @@ class VieroChunkedUploader {
           if (this._probed) {
             return Promise.resolve();
           }
-          return this.hashForChunk({ index: i });
+          return this._hashForChunk({ index: i });
         });
       }
-      this.promiseSerial(proms, false, theChunkPromises);
-      return this.probeFile({ hashes, chunks, chunkPromises: theChunkPromises });
+      this._promiseSerial(proms, false, theChunkPromises);
+      return this._probeFile({ hashes, chunks, chunkPromises: theChunkPromises });
     }
-    return this.callProbe({ hashes, chunks, token: this._token }).then((res) => {
+    return this._callProbe({ hashes, chunks, token: this._token }).then((res) => {
       if (res.needMoreChunks) {
         const index = chunks.length;
         return chunkPromises[index].then(([md5, sha1]) => {
           chunks.push(`${md5}_${sha1}`);
 
-          return this.probeFile({ hashes, chunks, chunkPromises });
+          return this._probeFile({ hashes, chunks, chunkPromises });
         });
       }
       if (res.fullyUploaded) {
@@ -168,7 +176,7 @@ class VieroChunkedUploader {
     });
   }
 
-  fingerprintFile() {
+  _fingerprintFile() {
     this._checkCancelled();
     const intervals = [];
     for (let i = 0; i < this._uploadable.size; i += SLICE_LENGTH) {
@@ -189,7 +197,7 @@ class VieroChunkedUploader {
     return Promise.all(hashPromises);
   }
 
-  hashForChunk({ index }) {
+  _hashForChunk({ index }) {
     this._checkCancelled();
     const md5 = new SparkMD5.ArrayBuffer();
     const sha1 = Rusha.createHash();
@@ -219,7 +227,7 @@ class VieroChunkedUploader {
           reader.readAsArrayBuffer(slice);
         }));
       }
-      this.promiseSerial(proms).then(() => {
+      this._promiseSerial(proms).then(() => {
         const md5Dig = md5.end();
         const sha1Dig = sha1.digest('hex');
         resolve([md5Dig, sha1Dig]);
@@ -227,7 +235,7 @@ class VieroChunkedUploader {
     });
   }
 
-  promiseSerial(promiseWrappers, continueOnFail = false, promiseArray = undefined) {
+  _promiseSerial(promiseWrappers, continueOnFail = false, promiseArray = undefined) {
     return promiseWrappers.reduce((promise, promiseWrapper, idx) => {
       const part = promise.then((result) => {
         let thePromise = promiseWrapper();
@@ -248,7 +256,7 @@ class VieroChunkedUploader {
     }, Promise.resolve([]));
   }
 
-  callProbe({ hashes, chunks, token }) {
+  _callProbe({ hashes, chunks, token }) {
     this._checkCancelled();
     const url = `${VieroPlatform.URL.API}/node/${this._uploadable.nodeId}/probe?token=${token}`;
     const payload = Buffer.from(JSON.stringify({ hashes, chunks }));
@@ -269,18 +277,20 @@ class VieroChunkedUploader {
     })
       .catch((err) => {
         // signalNetUseEnd()
-        throw err;
+        throw new VieroUploaderGenericError(err);
       })
       .then((res) => {
         // signalNetUseEnd()
-        if (res.status !== 200) {
-          throw new VieroUploaderTechnicalError();
+        if (res.status === 404) {
+          throw new VieroUploaderNotFoundError();
+        } else if (res.status !== 200) {
+          throw new VieroUploaderGenericError(new Error('Unexpected HTTP status: not an HTTP 200!'));
         }
         return res.json();
       });
   }
 
-  upload() {
+  _upload() {
     this._checkCancelled();
     const chunksCount = Math.floor((this._uploadable.size - 1) / SLICE_LENGTH) + 1;
     this._chunksCount = chunksCount;
@@ -302,7 +312,7 @@ class VieroChunkedUploader {
       this._step = 'uploading';
     }
     emitEvent(VieroChunkedUploader.EVENT.DID_START_UPLOADING_CHUNK, { uploader: this });
-    return this.uploadChunk({
+    return this._uploadChunk({
       contentType: this._uploadable.mime,
       data: slice,
       size: byteLength,
@@ -313,15 +323,17 @@ class VieroChunkedUploader {
         emitEvent(VieroChunkedUploader.EVENT.DID_FINISH_UPLOADING_CHUNK, { uploader: this });
         if (!this._isLast) {
           this._index += 1;
-          this.upload();
+          return this._upload();
         }
+        return undefined;
       })
       .catch((err) => {
         emitEvent(VieroChunkedUploader.EVENT.DID_FINISH_UPLOADING_CHUNK, { uploader: this, err });
+        throw err;
       });
   }
 
-  uploadChunk({
+  _uploadChunk({
     contentType, data, size, index, token, retryMs = 10000,
   }) {
     this._checkCancelled();
@@ -339,7 +351,7 @@ class VieroChunkedUploader {
         if (!evt.lengthComputable) {
           return;
         }
-        this._statCurrent = this.calculateStats(start, evt.loaded);
+        this._statCurrent = this._calculateStats(start, evt.loaded);
         if (this._step !== 'cancelling') {
           this._step = 'uploading';
         }
@@ -353,7 +365,7 @@ class VieroChunkedUploader {
         this._statCurrent = {
           at: Date.now(), elapsed: 0, size: 0, byteps: 0, bitps: 0,
         };
-        const chunkStat = this.calculateStats(start, size);
+        const chunkStat = this._calculateStats(start, size);
         this._statOverall.chunks += 1;
         this._statOverall.elapsed += chunkStat.elapsed;
         this._statOverall.size += chunkStat.size;
@@ -380,7 +392,9 @@ class VieroChunkedUploader {
       xhr.send(data);
     }).catch(() => {
       // signalNetUseEnd()
-      // throw err;
+      if (xhr.status === 404) {
+        throw new VieroUploaderNotFoundError();
+      }
       if (xhr.status === 409) {
         throw new VieroUploaderConflictError();
       }
@@ -392,7 +406,7 @@ class VieroChunkedUploader {
           delete this._retryTimeout;
           // eslint-disable-next-line no-param-reassign
           retryMs = Math.min(retryMs * 2, 320000);
-          this.uploadChunk({
+          this._uploadChunk({
             contentType, data, size, index, token, retryMs,
           })
             .then(() => resolve())
@@ -404,7 +418,7 @@ class VieroChunkedUploader {
     });
   }
 
-  calculateStats(start, size) {
+  _calculateStats(start, size) {
     const at = Date.now();
     const elapsed = at - start;
     const byteps = size / (elapsed / 1000.0);

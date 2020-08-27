@@ -79,6 +79,13 @@ class VieroOperationQueue extends EventTarget {
     return this.operationsCount() === 0;
   }
 
+  get operations() {
+    return {
+      running: [...this._running],
+      waiting: [...this._waiting],
+    };
+  }
+
   addOperation(op) {
     this._idx += 1;
     const ref = this._idx;

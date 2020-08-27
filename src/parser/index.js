@@ -14,26 +14,25 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* eslint-disable max-classes-per-file */
+import fecha from 'fecha';
 
-class VieroUploaderCancelled { }
-class VieroUploaderConflictError { }
-class VieroUploaderFullyUploaded { }
-class VieroUploaderGenericError {
-  constructor(err) {
-    this._root = err || null;
-  }
+const time = {
+  standard(string, spec) {
+    switch (spec) {
+      case time.SPEC.EXIF: return fecha.parse(string, 'YYYY:MM:DD HH:mm:ss');
+      default: return null;
+    }
+  },
 
-  get root() {
-    return this._root;
-  }
-}
-class VieroUploaderNotFoundError { }
+  SPEC: {
+    EXIF: 'timeSpecExif',
+  },
+};
+
+const parser = {
+  time,
+};
 
 export {
-  VieroUploaderCancelled,
-  VieroUploaderConflictError,
-  VieroUploaderFullyUploaded,
-  VieroUploaderGenericError,
-  VieroUploaderNotFoundError,
+  parser,
 };

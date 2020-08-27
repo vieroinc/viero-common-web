@@ -14,5 +14,22 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-export { VieroEventCenter } from './event';
+export {
+  VieroEventCenter, onEvent, offEvent, emitEvent,
+} from './event';
+export { formatter } from './formatter';
 export { VieroHttpClient } from './http';
+export {
+  inputMediaDevices,
+  supportedConstraints,
+  canGetUserStream,
+  getUserStream,
+  canGetDisplayStream,
+  getDisplayStream,
+  canRequestApprovalDialog,
+  requestApprovalDialog,
+} from './media';
+export { VieroOperationQueue } from './opcue';
+export { parser } from './parser';
+export { VieroPlatform } from './platform';
+export { VieroUploader } from './uploader';

@@ -14,6 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+import FileType from 'file-type/browser';
+
 import { uuid } from '@viero/common/uid';
 import { VieroOperationQueue } from '../opcue';
 import { VieroPlatform } from '../platform';
@@ -76,12 +78,16 @@ const patchRepsWithTouchResponse = (
 ) => reduceToUploadables(touchRes, makeRepsByLookupKey(supported));
 
 class VieroUploader {
+  static get minimumBytes() {
+    return FileType.minimumBytes;
+  }
+
   static isIdle() {
     return OPQUEUE.operationsCount().total === 0;
   }
 
   static snapshot() {
-    return OPQUEUE.operations.map((op) => op.obj);
+    return OPQUEUE.operations;
   }
 
   static preProcess(items) {
@@ -149,7 +155,7 @@ class VieroUploader {
         OPQUEUE.addOperation(uploader);
       });
 
-    emitEvent(VieroUploader.EVENT.DID_ENQUEUE, { count: uploadables.count, size });
+    emitEvent(VieroUploader.EVENT.DID_ENQUEUE, { count: uploadables.length, size });
   }
 }
 

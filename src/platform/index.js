@@ -22,7 +22,10 @@ import { VieroHttpClient } from '../http';
 const log = new VieroLog('VieroPlatform');
 
 const CONFIGURATION = {
-  URL: {},
+  URL: {
+    API: null,
+    IMG: null,
+  },
   LANGUAGE: 'en',
   LOCALE: 'en-US',
   ACCESS_TOKEN: null,
@@ -74,7 +77,7 @@ class VieroPlatform {
         }
         if (response.locale) {
           CONFIGURATION.LOCALE = response.locale;
-          if (response.locale && response.locale.length >= 2) {
+          if (response.locale.length >= 2) {
             CONFIGURATION.LANGUAGE = response.locale.slice(0, 2);
           }
         }

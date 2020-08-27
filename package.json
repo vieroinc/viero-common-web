@@ -20,14 +20,19 @@
     "lint": "eslint ./src",
     "build": "npm run lint && npm run clean && babel src -d ./dist --source-maps inline",
     "dist": "npm run build && copyfiles package.json README.md LICENSE.md dist",
-    "npmjs": "npm run dist && npm publish ./dist --access public"
+    "test": "npm run dist && mocha",
+    "npmjs": "npm run test && npm publish ./dist --access public"
   },
   "module": "./index.js",
   "dependencies": {
     "@viero/common": "^1.5.7",
     "bluebird": "^3.7.2",
+    "chai": "^4.2.0",
     "event-target-shim": "^5.0.1",
+    "fecha": "^4.2.0",
     "file-type": "^14.7.1",
+    "filesize": "^6.1.0",
+    "mocha": "^8.1.1",
     "rusha": "^0.8.13",
     "spark-md5": "^3.0.1"
   },
