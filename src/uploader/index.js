@@ -14,8 +14,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-import FileType from 'file-type/browser';
-
 import { uuid } from '@viero/common/uid';
 import { VieroOperationQueue } from '../opcue';
 import { VieroPlatform } from '../platform';
@@ -79,7 +77,7 @@ const patchRepsWithTouchResponse = (
 
 class VieroUploader {
   static get minimumBytes() {
-    return FileType.minimumBytes;
+    return 4100;
   }
 
   static isIdle() {
