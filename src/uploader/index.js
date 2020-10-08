@@ -40,7 +40,9 @@ const repsToTouchables = (reps, omitPaths) => reps.map((rep) => {
     lookupKey: rep.lookupKey,
     name: rep.entry.name,
     type: rep.type.mime,
-    size: rep.file.size,
+    // Allow caller to set a size in the entry to override the file size
+    // if the file was read partially so far only for eg. mime detection.
+    size: rep.entry.size || rep.file.size,
   };
   if (!omitPaths) {
     touchable.path = rep.entry.fullPath.substring(0, rep.entry.fullPath.length - rep.entry.name.length);
