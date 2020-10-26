@@ -17,7 +17,7 @@
 import * as Bluebird from 'bluebird';
 import { VieroLog } from '@viero/common/log';
 import { VieroError } from '@viero/common/error';
-import { VieroHttpClient } from '../http';
+import { VieroHTTPWebClient } from '../http';
 
 const log = new VieroLog('VieroPlatform');
 
@@ -119,7 +119,7 @@ class VieroPlatform {
         url += `?token=${CONFIGURATION.ACCESS_TOKEN}`;
       }
     }
-    return VieroHttpClient[method](`${CONFIGURATION.URL.API}${url}`, { headers, body })
+    return VieroHTTPWebClient[method](`${CONFIGURATION.URL.API}${url}`, { headers, body })
       .catch((err) => {
         throw new VieroError('VieroPlatform', 799861, {
           [VieroPlatform.ERROR.KEY.URL]: url,

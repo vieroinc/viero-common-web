@@ -1,6 +1,6 @@
 {
   "name": "@viero/common-web",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "Common web code used by other @vieroinc libraries.",
   "homepage": "https://github.com/vieroinc/viero-common-web",
   "contributors": [
@@ -19,7 +19,9 @@
     "reset": "npm run clean && rimraf node_modules",
     "lint": "eslint ./src",
     "build": "npm run lint && npm run clean && babel src -d ./dist --source-maps inline",
+    "build:nolint": "npm run clean && babel src -d ./dist --source-maps inline",
     "dist": "npm run build && copyfiles package.json README.md LICENSE.md dist",
+    "dist:nolint": "npm run build:nolint && copyfiles package.json README.md LICENSE.md dist",
     "test": "npm run dist && mocha",
     "npmjs": "npm run test && npm publish ./dist --access public"
   },

@@ -18,7 +18,8 @@ export {
   VieroEventCenter, onEvent, offEvent, emitEvent,
 } from './event';
 export { formatter } from './formatter';
-export { VieroHttpClient } from './http';
+export { VieroHTTPWebClient } from './http';
+export { VieroInstaller } from './installer';
 export {
   inputMediaDevices,
   supportedConstraints,

@@ -43,7 +43,7 @@ const beginCommunication = () => {
   const to = pendingConnectionsCount;
   if (from === 0 && to === 1) {
     // eslint-disable-next-line no-use-before-define
-    emitEvent(VieroHttpClient.EVENT.COMMUNICATION_DID_BEGIN);
+    emitEvent(VieroHTTPWebClient.EVENT.COMMUNICATION_DID_BEGIN);
   }
 };
 
@@ -53,11 +53,11 @@ const endCommunication = () => {
   const to = pendingConnectionsCount;
   if (from === 1 && to === 0) {
     // eslint-disable-next-line no-use-before-define
-    emitEvent(VieroHttpClient.EVENT.COMMUNICATION_DID_END);
+    emitEvent(VieroHTTPWebClient.EVENT.COMMUNICATION_DID_END);
   }
 };
 
-class VieroHttpClient {
+export class VieroHTTPWebClient {
   static http(url, options) {
     // eslint-disable-next-line no-param-reassign
     options = {
@@ -85,7 +85,7 @@ class VieroHttpClient {
       options.headers['content-length'] = byteLengthOf(options.body);
     }
     beginCommunication();
-    emitEvent(VieroHttpClient.EVENT.REQUEST_DID_BEGIN);
+    emitEvent(VieroHTTPWebClient.EVENT.REQUEST_DID_BEGIN);
     return fetch(url, options).then((res) => Promise.all([res, res.text()])).then(([res, text]) => {
       let data;
       try {
@@ -95,14 +95,14 @@ class VieroHttpClient {
       }
       return { res, data };
     }).then((something) => {
-      emitEvent(VieroHttpClient.EVENT.REQUEST_DID_END, { res: something.res });
+      emitEvent(VieroHTTPWebClient.EVENT.REQUEST_DID_END, { res: something.res });
       endCommunication();
       return something;
     })
       .catch((err) => {
-        emitEvent(VieroHttpClient.EVENT.REQUEST_DID_FAIL, { err });
+        emitEvent(VieroHTTPWebClient.EVENT.REQUEST_DID_FAIL, { err });
         endCommunication(this.notificationAdapter);
-        throw new VieroError('VieroHttpClient', 497988, { [VieroError.KEY.ERROR]: err });
+        throw new VieroError('VieroHTTPWebClient', 497988, { [VieroError.KEY.ERROR]: err });
       });
   }
 
@@ -123,12 +123,10 @@ class VieroHttpClient {
   }
 }
 
-VieroHttpClient.EVENT = {
+VieroHTTPWebClient.EVENT = {
   COMMUNICATION_DID_BEGIN: 'VieroHttpClientEventCommunicationDidBegin',
   COMMUNICATION_DID_END: 'VieroHttpClientEventCommunicationDidEnd',
   REQUEST_DID_BEGIN: 'VieroHttpClientEventRequestDidBegin',
   REQUEST_DID_END: 'VieroHttpClientEventRequestDidEnd',
   REQUEST_DID_FAIL: 'VieroHttpClientEventRequestDidFail',
 };
-
-export { VieroHttpClient };
