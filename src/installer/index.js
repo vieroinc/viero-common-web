@@ -14,10 +14,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-import { VieroLog } from '@viero/common/log';
-
-const log = new VieroLog('VieroUpdater');
-
 export class VieroInstaller {
   static checkInstallOrUpdate() {
     return fetch('/_static/manifest')
@@ -44,10 +40,7 @@ export class VieroInstaller {
             return acc;
           }, []);
           return pathnames;
-        }))
-      .catch((err) => {
-        if (log.isError()) log.error('checkInstallOrUpdate', err);
-      });
+        }));
   }
 
   static installOrUpdate(pathnames) {

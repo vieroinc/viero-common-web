@@ -1,6 +1,6 @@
 {
   "name": "@viero/common-web",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Common web code used by other @vieroinc libraries.",
   "homepage": "https://github.com/vieroinc/viero-common-web",
   "contributors": [
